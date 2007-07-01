@@ -1,13 +1,14 @@
 Summary:	An LDAP-based blacklist engine for SpamAssassin
 Name:		perl-Mail-SpamAssassin-Plugin-LDAPfilter
 Version:	0.09
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	Apache License
 Group:		Development/Perl
 URL:		http://www.ntrg.com/misc/ldapfilter/
-Source0:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.cf.bz2
-Source1:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.pm.bz2
-Patch0:		LDAPfilter-fix-module-path.patch
+Source0:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.cf
+Source1:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.pm
+Source2:	http://www.ntrg.com/misc/ldapfilter/mailFilter.schema
+Source3:	http://www.ntrg.com/misc/ldapfilter/spamAssassinFilter.schema
 Requires(pre): rpm-helper
 Requires(postun): rpm-helper
 Requires(pre):  spamassassin-spamd >= 3.1.1
@@ -25,10 +26,13 @@ the message according to the values that are returned.
 
 %setup -q -T -c -n %{name}-%{version}
 
-bzcat %{SOURCE0} > LDAPfilter.cf
-bzcat %{SOURCE1} > LDAPfilter.pm
+cp %{SOURCE0} LDAPfilter.cf
+cp %{SOURCE1} LDAPfilter.pm
+cp %{SOURCE2} .
+cp %{SOURCE3} .
 
-%patch0
+# fix path
+perl -pi -e "s|ldapfilter\.pm|%{perl_vendorlib}/Mail/SpamAssassin/Plugin/LDAPfilter\.pm|g" LDAPfilter.cf
 
 %build
 
@@ -62,8 +66,7 @@ fi
 
 %files
 %defattr(644,root,root,755)
+%doc mailFilter.schema spamAssassinFilter.schema
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/mail/spamassassin/LDAPfilter.cf
 %{perl_vendorlib}/Mail/SpamAssassin/Plugin/LDAPfilter.pm
 %{_mandir}/man3/Mail::SpamAssassin::Plugin::LDAPfilter.3pm*
-
-
