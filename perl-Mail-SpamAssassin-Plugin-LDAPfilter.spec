@@ -1,7 +1,7 @@
 Summary:	An LDAP-based blacklist engine for SpamAssassin
 Name:		perl-Mail-SpamAssassin-Plugin-LDAPfilter
 Version:	0.09
-Release:	%mkrel 6
+Release:	%mkrel 7
 License:	Apache License
 Group:		Development/Perl
 URL:		http://www.ntrg.com/misc/ldapfilter/
