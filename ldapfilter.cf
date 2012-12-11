@@ -1,0 +1,318 @@
+#
+# ldapfilter.cf
+# version 0.04, June 20, 2005
+#
+# Eric A. Hall, <ehall@ntrg.com>
+# http://www.ntrg.com/misc/ldapfilter/
+#
+# <@LICENSE>
+# Copyright 2005 Eric A. Hall <ehall@ntrg.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+
+#
+# load the LDAPfilter plugin
+#
+loadplugin Mail::SpamAssassin::Plugin::LDAPfilter ldapfilter.pm
+
+#############################################################################
+# OPTION DEFINITIONS                                                        #
+#############################################################################
+
+#
+# LDAP session options
+#
+#ldapfilter_ldap_transport		ldap	# ldap|ldaps|ldapi
+#ldapfilter_ldap_server			""	# use LDAP SRV data
+#ldapfilter_ldap_port			""	# use LDAP SRV data
+#ldapfilter_ldap_version		3
+#ldapfilter_ldap_bind_dn		""	# use anonymous bind
+#ldapfilter_ldap_bind_password		""	# use anonymous bind
+#ldapfilter_ldap_search_base		""	# use the namingContext
+#ldapfilter_ldap_search_scope		sub	# base|one|sub
+#ldapfilter_ldap_search_deref		never	# never|search|find|always
+#
+#ldapfilter_ldap_ssl_port		636
+#ldapfilter_ldap_ssl_verify		none	# none|optional|require
+#ldapfilter_ldap_ssl_capath		/etc/ssl/certs/
+#
+#ldapfilter_ldap_ldapi_path		/var/run/slapd/ldapi
+#ldapfilter_ldap_timeout		5	# timeout value in seconds
+#ldapfilter_ldap_persistency		off	# on|off
+#ldapfilter_ldap_search_mode		batch	# batch|single 
+#
+
+#
+# LDAP schema options
+#
+#ldapfilter_ldap_match_attr		mailFilterName
+#ldapfilter_ldap_ip_match_attr		""
+#ldapfilter_ldap_dns_match_attr		""
+#ldapfilter_ldap_email_match_attr	""
+#ldapfilter_ldap_uri_match_attr		""
+#
+#ldapfilter_ldap_ip_from_attr		spamAssassinFilterClient
+#ldapfilter_ldap_rdns_from_attr		spamAssassinFilterClient
+#ldapfilter_ldap_helo_from_attr		spamAssassinFilterHelo
+#ldapfilter_ldap_env_from_attr		spamAssassinFilterEnvFrom
+#ldapfilter_ldap_env_to_attr		spamAssassinFilterEnvTo
+#ldapfilter_ldap_msg_from_attr		spamAssassinFilter822From
+#ldapfilter_ldap_msg_rplyto_attr	spamAssassinFilter822RplyTo
+#ldapfilter_ldap_msg_tocc_attr		spamAssassinFilter822To
+#ldapfilter_ldap_msg_uri_attr		spamAssassinFilter822Uri
+#
+#ldapfilter_ldap_blacklist_val		BLACKLISTED
+#ldapfilter_ldap_darklist_val		DARKLISTED
+#ldapfilter_ldap_lightlist_val		LIGHTLISTED
+#ldapfilter_ldap_whitelist_val		WHITELISTED
+#
+
+#
+# Resource-specific options
+#
+#ldapfilter_search_ip_from		on	# on|off
+#ldapfilter_search_rdns_from		on	# on|off
+#ldapfilter_search_helo_from		on	# on|off
+#ldapfilter_search_env_from		on	# on|off
+#ldapfilter_search_env_to		on	# on|off
+#ldapfilter_search_msg_from		on	# on|off
+#ldapfilter_search_msg_rplyto		on	# on|off
+#ldapfilter_search_msg_tocc		on	# on|off
+#ldapfilter_search_msg_uri		on	# on|off
+#
+#ldapfilter_env_from_header		""	# not used
+#ldapfilter_env_to_header		""	# not used
+#
+#ldapfilter_recipient_limit		10	# "0" = no limit
+#
+#ldapfilter_recipient_filter		""	# not used
+#
+#ldapfilter_cidr_lookups		on	# on|off
+#
+#ldapfilter_recursion_limit		0	# "0" = no limit
+#
+#ldapfilter_verify_resources            on      # on|off
+#
+
+#############################################################################
+# RULE DEFINITIONS                                                          #
+#############################################################################
+
+#
+# SMTP client IP address
+#
+header LDAP_IP_FROM_BLACK	eval:ldap_ip_from_blacklisted()
+describe LDAP_IP_FROM_BLACK	Checks SMTP client IP for blacklist
+tflags LDAP_IP_FROM_BLACK	net
+score LDAP_IP_FROM_BLACK	50.0
+
+header LDAP_IP_FROM_DARK	eval:ldap_ip_from_darklisted()
+describe LDAP_IP_FROM_DARK	Checks SMTP client IP for darklist
+tflags LDAP_IP_FROM_DARK	net
+score LDAP_IP_FROM_DARK		10.0
+
+header LDAP_IP_FROM_LIGHT	eval:ldap_ip_from_lightlisted()
+describe LDAP_IP_FROM_LIGHT	Checks SMTP client IP for lightlist
+tflags LDAP_IP_FROM_LIGHT	net
+score LDAP_IP_FROM_LIGHT	-20.0
+
+header LDAP_IP_FROM_WHITE	eval:ldap_ip_from_whitelisted()
+describe LDAP_IP_FROM_WHITE	Checks SMTP client IP for whitelist
+tflags LDAP_IP_FROM_WHITE	net
+score LDAP_IP_FROM_WHITE	-100.0
+
+#
+# SMTP client reverse-DNS domain name
+#
+header LDAP_RDNS_FROM_BLACK	eval:ldap_rdns_from_blacklisted()
+describe LDAP_RDNS_FROM_BLACK	Checks SMTP client rDNS for blacklist
+tflags LDAP_RDNS_FROM_BLACK	net
+score LDAP_RDNS_FROM_BLACK	50.0
+
+header LDAP_RDNS_FROM_DARK	eval:ldap_rdns_from_darklisted()
+describe LDAP_RDNS_FROM_DARK	Checks SMTP client rDNS for darklist
+tflags LDAP_RDNS_FROM_DARK	net
+score LDAP_RDNS_FROM_DARK	10.0
+
+header LDAP_RDNS_FROM_LIGHT	eval:ldap_rdns_from_lightlisted()
+describe LDAP_RDNS_FROM_LIGHT	Checks SMTP client rDNS for lightlist
+tflags LDAP_RDNS_FROM_LIGHT	net
+score LDAP_RDNS_FROM_LIGHT	-20.0
+
+header LDAP_RDNS_FROM_WHITE	eval:ldap_rdns_from_whitelisted()
+describe LDAP_RDNS_FROM_WHITE	Checks SMTP client rDNS for whitelist
+tflags LDAP_RDNS_FROM_WHITE	net
+score LDAP_RDNS_FROM_WHITE	-100.0
+
+#
+# SMTP client HELO identifier
+#
+header LDAP_HELO_FROM_BLACK	eval:ldap_helo_from_blacklisted()
+describe LDAP_HELO_FROM_BLACK	Checks SMTP client HELO for blacklist
+tflags LDAP_HELO_FROM_BLACK	net
+score LDAP_HELO_FROM_BLACK	50.0
+
+header LDAP_HELO_FROM_DARK	eval:ldap_helo_from_darklisted()
+describe LDAP_HELO_FROM_DARK	Checks SMTP client HELO for darklist
+tflags LDAP_HELO_FROM_DARK	net
+score LDAP_HELO_FROM_DARK	10.0
+
+header LDAP_HELO_FROM_LIGHT	eval:ldap_helo_from_lightlisted()
+describe LDAP_HELO_FROM_LIGHT	Checks SMTP client HELO for lightlist
+tflags LDAP_HELO_FROM_LIGHT	net
+score LDAP_HELO_FROM_LIGHT	-20.0
+
+header LDAP_HELO_FROM_WHITE	eval:ldap_helo_from_whitelisted()
+describe LDAP_HELO_FROM_WHITE	Checks SMTP client HELO for whitelist
+tflags LDAP_HELO_FROM_WHITE	net
+score LDAP_HELO_FROM_WHITE	-100.0
+
+#
+# SMTP envelope MAIL-FROM command
+#
+header LDAP_ENV_FROM_BLACK	eval:ldap_env_from_blacklisted()
+describe LDAP_ENV_FROM_BLACK	Checks SMTP MAIL-FROM address for blacklist
+tflags LDAP_ENV_FROM_BLACK	net
+score LDAP_ENV_FROM_BLACK	50.0
+
+header LDAP_ENV_FROM_DARK	eval:ldap_env_from_darklisted()
+describe LDAP_ENV_FROM_DARK	Checks SMTP MAIL-FROM address for darklist
+tflags LDAP_ENV_FROM_DARK	net
+score LDAP_ENV_FROM_DARK	10.0
+
+header LDAP_ENV_FROM_LIGHT	eval:ldap_env_from_lightlisted()
+describe LDAP_ENV_FROM_LIGHT	Checks SMTP MAIL-FROM address for lightlist
+tflags LDAP_ENV_FROM_LIGHT	net
+score LDAP_ENV_FROM_LIGHT	-20.0
+
+header LDAP_ENV_FROM_WHITE	eval:ldap_env_from_whitelisted()
+describe LDAP_ENV_FROM_WHITE	Checks SMTP MAIL-FROM address for whitelist
+tflags LDAP_ENV_FROM_WHITE	net
+score LDAP_ENV_FROM_WHITE	-100.0
+
+#
+# SMTP envelope RCPT-TO command
+#
+header LDAP_ENV_TO_BLACK	eval:ldap_env_to_blacklisted()
+describe LDAP_ENV_TO_BLACK	Checks SMTP RCPT-TO address for blacklist
+tflags LDAP_ENV_TO_BLACK	net
+score LDAP_ENV_TO_BLACK		50.0
+
+header LDAP_ENV_TO_DARK		eval:ldap_env_to_darklisted()
+describe LDAP_ENV_TO_DARK	Checks SMTP RCPT-TO address for darklist
+tflags LDAP_ENV_TO_DARK		net
+score LDAP_ENV_TO_DARK		10.0
+
+header LDAP_ENV_TO_LIGHT	eval:ldap_env_to_lightlisted()
+describe LDAP_ENV_TO_LIGHT	Checks SMTP RCPT-TO address for lightlist
+tflags LDAP_ENV_TO_LIGHT	net
+score LDAP_ENV_TO_LIGHT		-20.0
+
+header LDAP_ENV_TO_WHITE	eval:ldap_env_to_whitelisted()
+describe LDAP_ENV_TO_WHITE	Checks SMTP RCPT-TO address for whitelist
+tflags LDAP_ENV_TO_WHITE	net
+score LDAP_ENV_TO_WHITE		-100.0
+
+#
+# RFC-822 message From: header field
+#
+header LDAP_MSG_FROM_BLACK	eval:ldap_msg_from_blacklisted()
+describe LDAP_MSG_FROM_BLACK	Checks RFC-822 From: address for blacklist
+tflags LDAP_MSG_FROM_BLACK	net
+score LDAP_MSG_FROM_BLACK	50.0
+
+header LDAP_MSG_FROM_DARK	eval:ldap_msg_from_darklisted()
+describe LDAP_MSG_FROM_DARK	Checks RFC-822 From: address for darklist
+tflags LDAP_MSG_FROM_DARK	net
+score LDAP_MSG_FROM_DARK	10.0
+
+header LDAP_MSG_FROM_LIGHT	eval:ldap_msg_from_lightlisted()
+describe LDAP_MSG_FROM_LIGHT	Checks RFC-822 From: address for lightlist
+tflags LDAP_MSG_FROM_LIGHT	net
+score LDAP_MSG_FROM_LIGHT	-20.0
+
+header LDAP_MSG_FROM_WHITE	eval:ldap_msg_from_whitelisted()
+describe LDAP_MSG_FROM_WHITE	Checks RFC-822 From: address for whitelist
+tflags LDAP_MSG_FROM_WHITE	net
+score LDAP_MSG_FROM_WHITE	-100.0
+
+#
+# RFC-822 message Reply-To: header field
+#
+header LDAP_MSG_RPLYTO_BLACK	eval:ldap_msg_rplyto_blacklisted()
+describe LDAP_MSG_RPLYTO_BLACK	Checks RFC-822 Reply-To: address for blacklist
+tflags LDAP_MSG_RPLYTO_BLACK	net
+score LDAP_MSG_RPLYTO_BLACK	50.0
+
+header LDAP_MSG_RPLYTO_DARK	eval:ldap_msg_rplyto_darklisted()
+describe LDAP_MSG_RPLYTO_DARK	Checks RFC-822 Reply-To: address for darklist
+tflags LDAP_MSG_RPLYTO_DARK	net
+score LDAP_MSG_RPLYTO_DARK	10.0
+
+header LDAP_MSG_RPLYTO_LIGHT	eval:ldap_msg_rplyto_lightlisted()
+describe LDAP_MSG_RPLYTO_LIGHT	Checks RFC-822 Reply-To: address for lightlist
+tflags LDAP_MSG_RPLYTO_LIGHT	net
+score LDAP_MSG_RPLYTO_LIGHT	-20.0
+
+header LDAP_MSG_RPLYTO_WHITE	eval:ldap_msg_rplyto_whitelisted()
+describe LDAP_MSG_RPLYTO_WHITE	Checks RFC-822 Reply-To: address for whitelist
+tflags LDAP_MSG_RPLYTO_WHITE	net
+score LDAP_MSG_RPLYTO_WHITE	-100.0
+
+#
+# RFC-822 message To: and Cc: header fields
+#
+header LDAP_MSG_TO_BLACK	eval:ldap_msg_tocc_blacklisted()
+describe LDAP_MSG_TO_BLACK	Checks RFC-822 To:/Cc: addresses for blacklist
+tflags LDAP_MSG_TO_BLACK	net
+score LDAP_MSG_TO_BLACK		50.0
+
+header LDAP_MSG_TO_DARK		eval:ldap_msg_tocc_darklisted()
+describe LDAP_MSG_TO_DARK	Checks RFC-822 To:/Cc: addresses for darklist
+tflags LDAP_MSG_TO_DARK		net
+score LDAP_MSG_TO_DARK		10.0
+
+header LDAP_MSG_TO_LIGHT	eval:ldap_msg_tocc_lightlisted()
+describe LDAP_MSG_TO_LIGHT	Checks RFC-822 To:/Cc: addresses for lightlist
+tflags LDAP_MSG_TO_LIGHT	net
+score LDAP_MSG_TO_LIGHT		-20.0
+
+header LDAP_MSG_TO_WHITE	eval:ldap_msg_tocc_whitelisted()
+describe LDAP_MSG_TO_WHITE	Checks RFC-822 To:/Cc: addresses for whitelist
+tflags LDAP_MSG_TO_WHITE	net
+score LDAP_MSG_TO_WHITE		-100.0
+
+#
+# RFC-822 message body URIs
+#
+header LDAP_MSG_URI_BLACK       eval:ldap_msg_uri_blacklisted()
+describe LDAP_MSG_URI_BLACK     Checks RFC-822 message URIs for blacklist
+tflags LDAP_MSG_URI_BLACK       net
+score LDAP_MSG_URI_BLACK        50.0
+
+header LDAP_MSG_URI_DARK        eval:ldap_msg_uri_darklisted()
+describe LDAP_MSG_URI_DARK      Checks RFC-822 message URIs for darklist
+tflags LDAP_MSG_URI_DARK        net
+score LDAP_MSG_URI_DARK         10.0
+
+header LDAP_MSG_URI_LIGHT       eval:ldap_msg_uri_lightlisted()
+describe LDAP_MSG_URI_LIGHT     Checks RFC-822 message URIs for lightlist
+tflags LDAP_MSG_URI_LIGHT       net
+score LDAP_MSG_URI_LIGHT        -20.0
+
+header LDAP_MSG_URI_WHITE       eval:ldap_msg_uri_whitelisted()
+describe LDAP_MSG_URI_WHITE     Checks RFC-822 message URIs for whitelist
+tflags LDAP_MSG_URI_WHITE       net
+score LDAP_MSG_URI_WHITE        -100.0

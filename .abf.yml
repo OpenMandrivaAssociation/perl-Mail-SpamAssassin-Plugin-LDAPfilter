@@ -1,5 +1,0 @@
-sources:
-  "ldapfilter.cf:"	a219bf59162a978f129cf597cb52a3f5af151863
-  "ldapfilter.pm:"	5a61450a2a96ab13bcf3f0db58a3c36b0f141294
-  "mailFilter.schema:"	0e18463f4486e4fce29f57752df38914db80b9c0
-  "spamAssassinFilter.schema:"	c00e1360648a884ddbfb0518fe49e6a022fd8ac2

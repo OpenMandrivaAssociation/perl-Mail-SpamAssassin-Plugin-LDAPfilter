@@ -70,3 +70,35 @@ fi
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/mail/spamassassin/LDAPfilter.cf
 %{perl_vendorlib}/Mail/SpamAssassin/Plugin/LDAPfilter.pm
 %{_mandir}/man3/Mail::SpamAssassin::Plugin::LDAPfilter.3pm*
+
+
+%changelog
+* Fri Sep 04 2009 Thierry Vignaud <tv@mandriva.org> 0.09-7mdv2010.0
++ Revision: 430488
+- rebuild
+
+* Thu Jul 31 2008 Thierry Vignaud <tv@mandriva.org> 0.09-6mdv2009.0
++ Revision: 257717
+- rebuild
+
+* Thu Jul 24 2008 Thierry Vignaud <tv@mandriva.org> 0.09-5mdv2009.0
++ Revision: 245792
+- rebuild
+
+* Wed Jan 02 2008 Olivier Blin <oblin@mandriva.com> 0.09-3mdv2008.1
++ Revision: 140691
+- restore BuildRoot
+
+  + Thierry Vignaud <tv@mandriva.org>
+    - kill re-definition of %%buildroot on Pixel's request
+
+* Sun Jul 01 2007 Oden Eriksson <oeriksson@mandriva.com> 0.09-3mdv2008.0
++ Revision: 46362
+- misc fixes
+
+
+* Sat Nov 25 2006 Emmanuel Andry <eandry@mandriva.org> 0.09-2mdv2007.0
++ Revision: 87286
+- patch to fix perl module path
+- Import perl-Mail-SpamAssassin-Plugin-LDAPfilter
+
