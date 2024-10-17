@@ -4,7 +4,7 @@ Version:	0.09
 Release:	9
 License:	Apache License
 Group:		Development/Perl
-URL:		http://www.ntrg.com/misc/ldapfilter/
+URL:		https://www.ntrg.com/misc/ldapfilter/
 Source0:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.cf
 Source1:	http://www.ntrg.com/misc/ldapfilter/ldapfilter.pm
 Source2:	http://www.ntrg.com/misc/ldapfilter/mailFilter.schema
